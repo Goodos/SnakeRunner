@@ -1,5 +1,5 @@
-using Input;
 using UnityEngine;
+using System;
 
 namespace Core.Movement {
 	public class MovementController : MonoBehaviour {
@@ -9,9 +9,13 @@ namespace Core.Movement {
 		
 		[Header("Input configuration")]
 		[SerializeField] private bool hasLockInput;
+
+		[SerializeField] Vector2 moveLimits;
 		
 		private Rigidbody _rigidbody;
 		private float inputValueWhenLocked = 0f;
+
+		private float x = 0;
 
 		public float ForwardSpeed {
 			get => forwardSpeed;
@@ -27,14 +31,20 @@ namespace Core.Movement {
 			_rigidbody = GetComponent<Rigidbody>();
 		}
 
-		private void Update() {
-			Move();
+		private void FixedUpdate() {
+			if (UnityEngine.Input.GetMouseButton(0))
+				Move();
 		}
 
 		private void Move() {
+			
+			if (UnityEngine.Input.GetMouseButton(0))
+			{
+				x = UnityEngine.Input.GetAxis ("Mouse X");
+			}
 			var direction = transform.forward * forwardSpeed;
-			var horizontalInput = !hasLockInput ? InputHandler.Instance.GetHorizontal() : inputValueWhenLocked;
-			var rotationInput = horizontalInput * horizontalSpeed;
+			var horizontalInput = !hasLockInput ? x : inputValueWhenLocked;
+			var rotationInput = Math.Clamp(horizontalInput, moveLimits.x, moveLimits.y) * horizontalSpeed;
 			direction.x = rotationInput;
 			MoveToDirection(direction);
 		}
